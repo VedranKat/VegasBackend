@@ -16,14 +16,10 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private BigDecimal price;
-    @Column(name = "win_amount")
     private BigDecimal winAmount;
     private Date endDate;
     private boolean isWon;
     private boolean isFinished;
     @ManyToOne
     private User user;
-    @OneToMany
-    @JoinColumn(name = "ticket_id")
-    private Set<Game> games;
 }
