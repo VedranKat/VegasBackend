@@ -4,6 +4,7 @@ import com.example.vegasBackend.dto.request.AuthenticationRequest;
 import com.example.vegasBackend.dto.request.RegisterRequest;
 import com.example.vegasBackend.dto.response.TokenResponse;
 import com.example.vegasBackend.exception.EntityNotFoundException;
+import com.example.vegasBackend.exception.PasswordMismatchException;
 import com.example.vegasBackend.model.User;
 import com.example.vegasBackend.repository.api.UserRepository;
 import com.example.vegasBackend.service.api.AuthenticationService;
@@ -27,7 +28,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     @Override
-    public TokenResponse register(RegisterRequest registerRequest) {
+    public TokenResponse register(RegisterRequest registerRequest) throws PasswordMismatchException {
+
+        if(!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())){
+            throw new PasswordMismatchException("Passwords do not match");
+        }
 
         var user = User.builder()
                 .email(registerRequest.getEmail())
