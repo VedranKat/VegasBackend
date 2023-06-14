@@ -49,6 +49,12 @@
 			<version>3.1.1</version>
 		</dependency>
 
+		<!-- Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
 		<!-- JWT -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -73,10 +79,22 @@
 			<version>1.2.12</version>
 		</dependency>
 
+		<!-- Environment variables -->
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>2.3.1</version>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
