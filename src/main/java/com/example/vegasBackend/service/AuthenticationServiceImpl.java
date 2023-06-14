@@ -5,6 +5,7 @@ import com.example.vegasBackend.dto.request.RegisterRequest;
 import com.example.vegasBackend.dto.response.TokenResponse;
 import com.example.vegasBackend.exception.EntityNotFoundException;
 import com.example.vegasBackend.exception.PasswordMismatchException;
+import com.example.vegasBackend.exception.UserAlreadyExistsException;
 import com.example.vegasBackend.model.User;
 import com.example.vegasBackend.repository.api.UserRepository;
 import com.example.vegasBackend.service.api.AuthenticationService;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -28,15 +31,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     @Override
-    public TokenResponse register(RegisterRequest registerRequest) throws PasswordMismatchException {
+    public TokenResponse register(RegisterRequest registerRequest) throws PasswordMismatchException, UserAlreadyExistsException {
 
         if(!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())){
             throw new PasswordMismatchException("Passwords do not match");
         }
 
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new UserAlreadyExistsException("User with email " + registerRequest.getEmail() + " already exists");
+        }
+
         var user = User.builder()
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .balance(BigDecimal.valueOf(0.0))
                 .build();
 
         userRepository.save(user);
