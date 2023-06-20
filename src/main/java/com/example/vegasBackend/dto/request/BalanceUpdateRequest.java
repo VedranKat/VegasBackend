@@ -2,12 +2,12 @@ package com.example.vegasBackend.dto.request;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AuthenticationRequest {
-
+public class BalanceUpdateRequest {
     private String email;
-    private String password;
+    private BigDecimal balanceDelta;
 }

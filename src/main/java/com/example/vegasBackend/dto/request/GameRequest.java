@@ -1,7 +1,6 @@
 package com.example.vegasBackend.dto.request;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Data
 @RequiredArgsConstructor

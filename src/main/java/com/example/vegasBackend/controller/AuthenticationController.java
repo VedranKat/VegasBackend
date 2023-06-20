@@ -19,21 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
-    private static final Logger LOG = LogManager.getLogger(AuthenticationController.class);
     private final AuthenticationService authenticationService;
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest registerRequest)
             throws PasswordMismatchException, UserAlreadyExistsException {
-        LOG.info(" ***** AuthenticationController : register() ***** ");
 
         return ResponseEntity.ok(authenticationService.register(registerRequest));
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<TokenResponse> authenticate(@RequestBody AuthenticationRequest authenticationRequest){
-        LOG.info(" ***** AuthenticationController : authenticate() ***** ");
 
         return ResponseEntity.ok(authenticationService.authenticate(authenticationRequest));
     }

@@ -17,15 +17,10 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class MyUserDetailsServiceImpl implements MyUserDetailsService {
-
-    private static final Logger LOG = LogManager.getLogger(UserServiceImpl.class);
-
     private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        LOG.info(" ---- MyUserDetailsService Implementation : loadUserByUsername() ---- ");
 
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + " not found"));

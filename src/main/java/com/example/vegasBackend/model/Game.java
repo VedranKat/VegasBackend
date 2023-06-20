@@ -13,11 +13,13 @@ public class Game {
     private Long id;
     private String firstCompetitor;
     private String secondCompetitor;
-    private String winner;
-    private String result;
+    private int firstCompetitorScore;
+    private int secondCompetitorScore;
     private Double firstOdd;
     private Double secondOdd;
+    private String winner;
+    private boolean isFinished;
     @ManyToOne
-    private Ticket ticket;
+    private Sport sport;
 
 }
