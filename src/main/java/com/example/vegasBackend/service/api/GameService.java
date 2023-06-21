@@ -1,6 +1,5 @@
 package com.example.vegasBackend.service.api;
 
-import com.example.vegasBackend.dto.request.GameRequest;
 import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
 
@@ -16,7 +15,14 @@ public interface GameService{
      * @param sportKey
      * @return List<GameResponse>
      */
-    List<GameResponseApi> getOdds(String sportKey);
+    List<GameResponseApi> getOddsFromApi(String sportKey);
+
+    /**
+     * Returns a list of games on offer from the database
+     * where isFinished attribute is false
+     * @return List<GameResponse>
+     */
+    List<GameResponse> getGamesFromDatabase();
 
 
 }

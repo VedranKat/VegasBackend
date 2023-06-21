@@ -1,6 +1,7 @@
 package com.example.vegasBackend.service;
 
 import com.example.vegasBackend.dto.request.GameRequest;
+import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.BookmakerResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
 import com.example.vegasBackend.dto.response.gameResponseApi.OutcomeResponse;
@@ -37,9 +38,11 @@ public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final SportRepository sportRepository;
 
+    private final ModelMapper mapper = new ModelMapper();
+
     @SneakyThrows
     @Override
-    public List<GameResponseApi> getOdds(String sportKey) {
+    public List<GameResponseApi> getOddsFromApi(String sportKey) {
 
         //TODO: Improve error handling
         try {
@@ -72,13 +75,23 @@ public class GameServiceImpl implements GameService {
             this.saveGames(gameResponses, sportKey);
 
             // Return the deserialized list of GameRequest objects
-            return gameResponses;
+            return gameResponses; // TODO: should return a list of GameResponse objects
         } catch (IOException e) {
             e.printStackTrace();
             return null; // TODO: Improve error handling
         } catch (EntityNotFoundException e) {
             throw new EntityNotFoundException(e.getMessage());
         }
+    }
+
+    @Override
+    public List<GameResponse> getGamesFromDatabase() {
+
+        List<Game> gameResponses = gameRepository.findAllByIsFinishedFalse();
+
+        return gameResponses.stream()
+                .map(game -> mapper.map(game, GameResponse.class))
+                .toList();
     }
 
     private void saveGames(List<GameResponseApi> gameresponses, String sportKey) throws EntityNotFoundException {
