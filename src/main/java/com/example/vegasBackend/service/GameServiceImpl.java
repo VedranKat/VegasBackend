@@ -1,6 +1,5 @@
 package com.example.vegasBackend.service;
 
-import com.example.vegasBackend.dto.request.GameRequest;
 import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.BookmakerResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
@@ -86,6 +85,8 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public List<GameResponse> getGamesFromDatabase() {
+
+        //TODO: Add commenceTime filter
 
         List<Game> gameResponses = gameRepository.findAllByIsFinishedFalse();
 

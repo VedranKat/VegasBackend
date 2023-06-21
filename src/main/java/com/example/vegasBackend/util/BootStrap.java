@@ -1,11 +1,15 @@
 package com.example.vegasBackend.util;
 
 import com.example.vegasBackend.model.Sport;
+import com.example.vegasBackend.model.User;
 import com.example.vegasBackend.repository.api.SportRepository;
+import com.example.vegasBackend.repository.api.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
 
 /*
  * This class is used to quickly
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Component;
 public class BootStrap implements ApplicationListener<ContextRefreshedEvent> {
 
     private final SportRepository sportRepository;
+    private final UserRepository userRepository;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
@@ -27,6 +32,7 @@ public class BootStrap implements ApplicationListener<ContextRefreshedEvent> {
     private void generateData(){
         bootStrapReminder();
         generateSports();
+        generateUsers();
 
         //generateUsers();
         //generateTickets();
@@ -63,9 +69,17 @@ public class BootStrap implements ApplicationListener<ContextRefreshedEvent> {
         mls.setDescription("Major League Soccer");
         sportRepository.save(mls);
 
+    }
 
+    private void generateUsers(){
 
+        System.out.println("Generating Users...");
 
+        User admin = new User();
+        admin.setEmail("admin@admin.com");
+        admin.setPassword("admin");
+        admin.setBalance(BigDecimal.valueOf(1000.00));
+        userRepository.save(admin);
 
     }
 }

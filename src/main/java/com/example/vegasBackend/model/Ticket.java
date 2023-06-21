@@ -1,6 +1,7 @@
 package com.example.vegasBackend.model;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 @Entity
 @Data
+@Builder
 @Table(name = "tickets")
 public class Ticket {
 
@@ -17,7 +19,6 @@ public class Ticket {
     private Long id;
     private BigDecimal price;
     private BigDecimal winAmount;
-    private Date endDate;
     private boolean isWon;
     private boolean isFinished;
     @ManyToOne
