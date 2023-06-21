@@ -86,8 +86,8 @@ public class TicketServiceImpl implements TicketService {
                             "Game with id " + gameRequest.getGameApiId() + " not found"));
 
             Date gameDate = game.getCommenceTime();
-            //compare gameDate with current time and add one two hours for safety
-            if(gameDate.compareTo(new Date(System.currentTimeMillis() + 7200000)) < 0){
+            //compare gameDate with current time and add one hour for safety
+            if(gameDate.compareTo(new Date(System.currentTimeMillis() + 3600000)) < 0){
                 throw new GameUnavailableException(
                         "Game with id " + gameRequest.getGameApiId() + " cannot be played");
             }

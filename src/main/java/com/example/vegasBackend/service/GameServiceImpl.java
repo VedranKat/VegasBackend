@@ -36,7 +36,6 @@ import java.util.Optional;
 public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final SportRepository sportRepository;
-
     private final ModelMapper mapper = new ModelMapper();
 
     @SneakyThrows
@@ -86,11 +85,12 @@ public class GameServiceImpl implements GameService {
     @Override
     public List<GameResponse> getGamesFromDatabase() {
 
-        //TODO: Add commenceTime filter
+        Date currentTime = new Date(System.currentTimeMillis() + 360000);
 
         List<Game> gameResponses = gameRepository.findAllByIsFinishedFalse();
 
         return gameResponses.stream()
+                .filter(game ->game.getCommenceTime().compareTo(currentTime) > 0)
                 .map(game -> mapper.map(game, GameResponse.class))
                 .toList();
     }
