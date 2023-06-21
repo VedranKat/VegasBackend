@@ -11,10 +11,12 @@ public interface GameService{
 
     /**
      * Calls the odds api and returns a list of games
-     * With the odds for each game
+     * with the odds for each game
+     * and saves them to the database
      * @param sportKey
      * @return List<GameResponse>
      */
     List<GameResponseApi> getOdds(String sportKey);
+
 
 }

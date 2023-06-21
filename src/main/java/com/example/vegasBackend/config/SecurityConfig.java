@@ -27,7 +27,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**")
                         .permitAll()
                         .anyRequest()
-                        .authenticated()
+                        .permitAll() //TODO: change to authenticated
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

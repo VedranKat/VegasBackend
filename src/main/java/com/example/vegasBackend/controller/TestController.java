@@ -1,6 +1,5 @@
 package com.example.vegasBackend.controller;
 
-import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
 import com.example.vegasBackend.service.api.GameService;
 import lombok.RequiredArgsConstructor;
@@ -18,11 +17,17 @@ public class TestController {
 
     private final GameService gameService;
 
-    @GetMapping("/hello")
-    public ResponseEntity<Object> sayHello(){
+    @GetMapping("/get-odds")
+    public ResponseEntity<Object> getOdds(){
 
-        List<GameResponseApi> games = gameService.getOdds("americanfootball_nfl");
+        List<GameResponseApi> games = gameService.getOdds("baseball_mlb");
 
         return ResponseEntity.ok(games);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<Object> test(){
+
+        return ResponseEntity.ok("test");
     }
 }
