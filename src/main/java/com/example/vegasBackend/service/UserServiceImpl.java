@@ -32,18 +32,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse deleteById(Long id) throws EntityNotFoundException {
-
-        User user = userRepository.findById(id).
-                orElseThrow(() -> new EntityNotFoundException("User with id " + id + " not found"));
-
-        //TODO: cascade delete user
-        userRepository.deleteById(id);
-
-        return mapper.map(user, UserResponse.class);
-    }
-
-    @Override
     public UserResponse updateBalance(BalanceUpdateRequest balanceUpdateRequest) throws EntityNotFoundException {
 
         User user = userRepository.findByEmail(balanceUpdateRequest.getEmail()).

@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface GameService{
 
-
     /**
      * Calls the odds api and returns a list of games
      * with the odds for each game
@@ -34,6 +33,12 @@ public interface GameService{
      * @return List<GameResponse>
      */
     List<GameResponse> getSoresFromApi(String sportKey) throws EntityNotFoundException;
+
+    /**
+     * Deletes games that are finished and have no tickets
+     * @return List<GameResponse>
+     */
+    List<GameResponse> deleteGamesFromDatabase();
 
 
 

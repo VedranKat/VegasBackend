@@ -8,4 +8,6 @@ import java.util.List;
 public interface TicketRepository extends CrudRepository<Ticket, Long> {
 
     List<Ticket> findAllByUserId(Long id);
+
+    List<Ticket> findAllByIsFinishedFalse();
 }

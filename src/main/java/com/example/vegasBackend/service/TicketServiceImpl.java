@@ -100,12 +100,68 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public List<TicketResponse> getAllByUserEmail(String email) {
-        return null;
+    public List<TicketResponse> getAllByUserEmail(String email) throws EntityNotFoundException {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "User with email " + email + " not found"));
+
+        List<Ticket> tickets = ticketRepository.findAllByUserId(user.getId());
+
+        List<TicketResponse> ticketResponses = new ArrayList<>();
+
+        tickets.forEach(ticket -> {
+            TicketResponse ticketResponse = mapper.map(ticket, TicketResponse.class);
+            ticketResponses.add(ticketResponse);
+        });
+        return ticketResponses;
     }
 
     @Override
-    public void checkTicket(Long id) {
+    public List<TicketResponse> validateTickets() {
 
+        List<TicketResponse> ticketResponses = new ArrayList<>();
+
+        //Get all unfinished tickets
+        List<Ticket> tickets = ticketRepository.findAllByIsFinishedFalse();
+
+        tickets.forEach(ticket -> {
+            //Get all games for the ticket
+            List<TicketGame> ticketGames = ticketGameRepository.findAllByTicketId(ticket.getId());
+
+            Boolean isWon = true;
+
+            //Iterate through all the games
+            for (TicketGame ticketGame: ticketGames){
+                //Check if the game is finished, if not, skip the ticket
+                if(!ticketGame.getGame().isFinished()){
+                    return;
+                }
+                //Check if the chosen winner is the actual winner, otherwise set isWon to false
+                if (!ticketGame.getGame().getWinner().equals(ticketGame.getChosenWinner())){
+                    isWon = false;
+                }
+            }
+            ticket.setFinished(true);
+            ticket.setWon(isWon);
+
+            User user = ticket.getUser();
+            //If the ticket is won, add the win amount to the user balance
+            if(isWon){
+                user.setBalance(user.getBalance().add(ticket.getWinAmount()));
+                userRepository.save(user);
+            }
+
+            Ticket savedTicket = ticketRepository.save(ticket);
+
+            TicketResponse ticketResponse = mapper.map(savedTicket, TicketResponse.class);
+            ticketResponse.setEmail(user.getEmail());
+
+            ticketResponses.add(ticketResponse);
+
+        });
+
+        return ticketResponses;
     }
+
 }

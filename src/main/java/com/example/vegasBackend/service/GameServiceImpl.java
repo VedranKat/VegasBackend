@@ -8,8 +8,10 @@ import com.example.vegasBackend.dto.response.gameScoreApi.GameScoreResponseApi;
 import com.example.vegasBackend.exception.EntityNotFoundException;
 import com.example.vegasBackend.model.Game;
 import com.example.vegasBackend.model.Sport;
+import com.example.vegasBackend.model.TicketGame;
 import com.example.vegasBackend.repository.api.GameRepository;
 import com.example.vegasBackend.repository.api.SportRepository;
+import com.example.vegasBackend.repository.api.TicketGameRepository;
 import com.example.vegasBackend.service.api.GameService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -38,6 +40,7 @@ import java.util.Optional;
 public class GameServiceImpl implements GameService {
     private final GameRepository gameRepository;
     private final SportRepository sportRepository;
+    private final TicketGameRepository ticketGameRepository;
     private final ModelMapper mapper = new ModelMapper();
 
     @Override
@@ -83,6 +86,28 @@ public class GameServiceImpl implements GameService {
 
         //Update and return the games
         return this.updateGames(gameScoreResponse, sportKey);
+    }
+
+    @Override
+    public List<GameResponse> deleteGamesFromDatabase() {
+
+        //Get all the games that are finished
+        List<Game> games = gameRepository.findAllByIsFinishedTrue();
+
+        List<GameResponse> gameResponses = new ArrayList<>();
+
+        //For each game, check if it's assigned to a ticket
+        games.forEach(game -> {
+            List<TicketGame> ticketGames = ticketGameRepository.findAllByGameId(game.getId());
+
+            //If it's not assigned to a ticket, delete it
+            if (ticketGames.isEmpty()) {
+                gameRepository.delete(game);
+                gameResponses.add(mapper.map(game, GameResponse.class));
+            }
+
+        });
+        return gameResponses;
     }
 
     private <T> List<T> getGamesFromApi(String apiUrl, Class<T> responseType) throws EntityNotFoundException {

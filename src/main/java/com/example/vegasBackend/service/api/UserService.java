@@ -15,14 +15,6 @@ public interface UserService{
     UserResponse getByEmail(String email) throws EntityNotFoundException;
 
     /**
-     * Deletes the user by id
-     * @param id
-     * @return UserResponse
-     * @throws EntityNotFoundException
-     */
-    UserResponse deleteById(Long id) throws EntityNotFoundException;
-
-    /**
      * Updates the user balance
      * @param balanceUpdateRequest
      * @return UserResponse

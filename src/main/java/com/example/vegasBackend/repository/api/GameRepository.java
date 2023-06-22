@@ -12,5 +12,7 @@ public interface GameRepository extends CrudRepository<Game, Long> {
 
     List<Game> findAllByIsFinishedFalse();
 
+    List<Game> findAllByIsFinishedTrue();
+
     List<Game> findAllBySportIdAndIsFinishedFalse(Long sportId);
 }

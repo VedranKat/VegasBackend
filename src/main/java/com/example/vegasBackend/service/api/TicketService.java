@@ -22,13 +22,13 @@ public interface TicketService{
      * @param email
      * @return List<TicketResponse>
      */
-    List<TicketResponse> getAllByUserEmail(String email);
+    List<TicketResponse> getAllByUserEmail(String email) throws EntityNotFoundException;
 
     /**
-     * Checks if the ticket is a winning one and updates the ticket status and user balance accordingly
-     * @param id
+     * Checks all the unfinished tickets in the database
+     * If the ticket is a winning ticket, the user's balance is updated
      */
-    void checkTicket(Long id);
+    List<TicketResponse> validateTickets();
 
 
 }
