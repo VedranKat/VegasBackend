@@ -4,6 +4,7 @@ import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.BookmakerResponse;
 import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
 import com.example.vegasBackend.dto.response.gameResponseApi.OutcomeResponse;
+import com.example.vegasBackend.dto.response.gameScoreApi.GameScoreResponseApi;
 import com.example.vegasBackend.exception.EntityNotFoundException;
 import com.example.vegasBackend.model.Game;
 import com.example.vegasBackend.model.Sport;
@@ -12,9 +13,9 @@ import com.example.vegasBackend.repository.api.SportRepository;
 import com.example.vegasBackend.service.api.GameService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
@@ -27,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -38,22 +40,59 @@ public class GameServiceImpl implements GameService {
     private final SportRepository sportRepository;
     private final ModelMapper mapper = new ModelMapper();
 
-    @SneakyThrows
     @Override
-    public List<GameResponseApi> getOddsFromApi(String sportKey) {
+    public List<GameResponse> getOddsFromApi(String sportKey) throws EntityNotFoundException {
 
-        //TODO: Improve error handling
+        String apiUrl = "https://api.the-odds-api.com/v4/sports/"
+                +sportKey
+                +"/odds/?regions=eu&markets=h2h&apiKey="
+                +System.getenv("ODDS_API_KEY");
+
+        List<GameResponseApi> gameResponse = this.getGamesFromApi(apiUrl, GameResponseApi.class);
+
+        return this.saveGames(gameResponse, sportKey);
+
+    }
+
+    @Override
+    public List<GameResponse> getGamesFromDatabase() {
+
+        Date currentTime = new Date(System.currentTimeMillis() + 360000); // 360 seconds, add a zero and check
+
+        List<Game> gameResponses = gameRepository.findAllByIsFinishedFalse();
+
+        return gameResponses.stream()
+                .filter(game ->game.getCommenceTime().compareTo(currentTime) > 0)
+                .map(game -> mapper.map(game, GameResponse.class))
+                .toList();
+    }
+
+    //Create some sort of check to see if a game hasn't been updated
+    //even though it's finished, in case the API fails to update the game
+    @Override
+    public List<GameResponse> getSoresFromApi(String sportKey) throws EntityNotFoundException {
+
+        String apiUrl = "https://api.the-odds-api.com/v4/sports/"
+                +sportKey
+                +"/scores/?apiKey="
+                +System.getenv("ODDS_API_KEY")
+                +"&daysFrom=2&dateFormat=iso";
+
+        //Get the games from the API
+        List<GameScoreResponseApi> gameScoreResponse = this.getGamesFromApi(apiUrl, GameScoreResponseApi.class);
+
+        //Update and return the games
+        return this.updateGames(gameScoreResponse, sportKey);
+    }
+
+    private <T> List<T> getGamesFromApi(String apiUrl, Class<T> responseType) throws EntityNotFoundException {
+
         try {
             // Create an instance of ObjectMapper
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             // Make the API call to retrieve the JSON response
-            String apiUrl = "https://api.the-odds-api.com/v4/sports/"
-                    +sportKey
-                    +"/odds/?regions=eu&markets=h2h&apiKey="
-                    +System.getenv("ODDS_API_KEY");
-
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -67,46 +106,86 @@ public class GameServiceImpl implements GameService {
             }
             reader.close();
 
-            // Deserialize the JSON response into a list of GameRequest objects
-            List<GameResponseApi> gameResponses = objectMapper.readValue(jsonContent.toString(), new TypeReference<List<GameResponseApi>>() {});
+            // Construct the JavaType for the generic response type
+            TypeFactory typeFactory = objectMapper.getTypeFactory();
+            JavaType javaType = typeFactory.constructCollectionType(List.class, responseType);
 
-            this.saveGames(gameResponses, sportKey);
-
-            // Return the deserialized list of GameRequest objects
-            return gameResponses; // TODO: should return a list of GameResponse objects
+            // Deserialize the JSON response into a list of objects
+            return objectMapper.readValue(jsonContent.toString(), javaType);
         } catch (IOException e) {
             e.printStackTrace();
             return null; // TODO: Improve error handling
-        } catch (EntityNotFoundException e) {
-            throw new EntityNotFoundException(e.getMessage());
         }
     }
 
-    @Override
-    public List<GameResponse> getGamesFromDatabase() {
-
-        Date currentTime = new Date(System.currentTimeMillis() + 360000);
-
-        List<Game> gameResponses = gameRepository.findAllByIsFinishedFalse();
-
-        return gameResponses.stream()
-                .filter(game ->game.getCommenceTime().compareTo(currentTime) > 0)
-                .map(game -> mapper.map(game, GameResponse.class))
-                .toList();
-    }
-
-    private void saveGames(List<GameResponseApi> gameresponses, String sportKey) throws EntityNotFoundException {
+    private List<GameResponse> updateGames(List<GameScoreResponseApi> gameResponses, String sportKey) throws EntityNotFoundException {
 
         Sport sport = sportRepository.findByKey(sportKey)
                 .orElseThrow(() -> new EntityNotFoundException
                         ("Sport with key " + sportKey + " not found"));
 
+        List<GameResponse> returnGameResponses = new ArrayList<>();
+
+        //Get a smaller subset of games from the database, for in-memory filtering
+        List<Game> games = gameRepository.findAllBySportIdAndIsFinishedFalse(sport.getId());
+
+        gameResponses.forEach(gameResponse ->{
+            //Find the game in the small list of games we fetched from the database
+            Game game = games.stream()
+                    .filter(game1 -> game1.getGameApiId().equals(gameResponse.getId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if(game != null && gameResponse.getCompleted().equals("true")) {
+
+                //Set the scores
+                gameResponse.getScores().forEach(score -> {
+                    if(score.getName().equals(game.getHomeTeam())) {
+                        game.setHomeTeamScore(score.getScore());
+                    } else if(score.getName().equals(game.getAwayTeam())) {
+                        game.setAwayTeamScore(score.getScore());
+                    }
+                });
+
+                //Set the winner
+                if (game.getHomeTeamScore() > game.getAwayTeamScore()) {
+                    game.setWinner(game.getHomeTeam());
+                } else if (game.getHomeTeamScore() < game.getAwayTeamScore()) {
+                    game.setWinner(game.getAwayTeam());
+                } else {
+                    game.setWinner("Draw");
+                }
+
+                game.setFinished(true);
+
+                Game savedGame = gameRepository.save(game);
+
+                returnGameResponses.add(mapper.map(savedGame, GameResponse.class));
+            }
+        });
+
+        return returnGameResponses;
+    }
+
+
+    private List<GameResponse> saveGames(List<GameResponseApi> gameresponses, String sportKey) throws EntityNotFoundException {
+
+        Sport sport = sportRepository.findByKey(sportKey)
+                .orElseThrow(() -> new EntityNotFoundException
+                        ("Sport with key " + sportKey + " not found"));
+
+        List<GameResponse> returnGameResponses = new ArrayList<>();
+
         gameresponses.forEach(gameResponseApi -> {
             Game game = mapGameResponseApiToGame(gameResponseApi, sport);
             if(game != null) {
-                gameRepository.save(game);
+                Game savedGame = gameRepository.save(game);
+
+                returnGameResponses.add(mapper.map(savedGame, GameResponse.class));
             }
         });
+
+        return returnGameResponses;
 
     }
 

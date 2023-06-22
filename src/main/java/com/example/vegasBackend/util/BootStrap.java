@@ -25,7 +25,7 @@ public class BootStrap implements ApplicationListener<ContextRefreshedEvent> {
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
 
-        generateData();
+        //generateData();
 
     }
 

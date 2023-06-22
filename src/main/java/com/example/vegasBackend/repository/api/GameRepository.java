@@ -11,4 +11,6 @@ public interface GameRepository extends CrudRepository<Game, Long> {
     Optional<Game> findByGameApiId(String gameApiId);
 
     List<Game> findAllByIsFinishedFalse();
+
+    List<Game> findAllBySportIdAndIsFinishedFalse(Long sportId);
 }
