@@ -25,6 +25,7 @@ public class Ticket {
     private BigDecimal winAmount;
     private boolean isWon;
     private boolean isFinished;
+    private Date dateCreated;
     @ManyToOne
     private User user;
 }

@@ -85,11 +85,6 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.9.19</version>
 		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.9.19</version>
-		</dependency>
 
 		<!-- Jackson for JSON serialization/deserialization -->
 		<dependency>

@@ -60,6 +60,7 @@ public class TicketServiceImpl implements TicketService {
                 .user(user)
                 .price(price)
                 .winAmount(ticketRequest.getWinAmount())
+                .dateCreated(new Date())
                 .build());
 
         //Save data to link table
@@ -73,8 +74,6 @@ public class TicketServiceImpl implements TicketService {
         userRepository.save(user);
 
         TicketResponse ticketResponse = mapper.map(savedTicket, TicketResponse.class);
-        ticketResponse.setEmail(user.getEmail());
-
         return ticketResponse;
     }
 
@@ -155,7 +154,6 @@ public class TicketServiceImpl implements TicketService {
             Ticket savedTicket = ticketRepository.save(ticket);
 
             TicketResponse ticketResponse = mapper.map(savedTicket, TicketResponse.class);
-            ticketResponse.setEmail(user.getEmail());
 
             ticketResponses.add(ticketResponse);
 
