@@ -18,5 +18,6 @@ public class GameResponse {
     private double homeTeamScore;
     private double awayTeamScore;
     private Date commenceTime;
+    private String sportKey;
 
 }

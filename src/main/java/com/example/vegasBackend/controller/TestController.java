@@ -2,8 +2,6 @@ package com.example.vegasBackend.controller;
 
 import com.example.vegasBackend.dto.response.GameResponse;
 import com.example.vegasBackend.dto.response.TicketResponse;
-import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
-import com.example.vegasBackend.dto.response.gameScoreApi.GameScoreResponseApi;
 import com.example.vegasBackend.exception.EntityNotFoundException;
 import com.example.vegasBackend.service.api.GameService;
 import com.example.vegasBackend.service.api.TicketService;
@@ -20,13 +18,20 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestController {
 
+    //TODO: Remove this controller later, it's just for testing purposes
     private final GameService gameService;
     private final TicketService ticketService;
 
     @GetMapping("/get-odds")
     public ResponseEntity<Object> getOdds() throws EntityNotFoundException {
 
+        // baseball_mlb, americanfootball_cfl, soccer_usa_mls
+
         List<GameResponse> games = gameService.getOddsFromApi("baseball_mlb");
+
+        List<GameResponse> additionalGames = gameService.getOddsFromApi("americanfootball_cfl");
+
+        games.addAll(additionalGames);
 
         return ResponseEntity.ok(games);
     }
@@ -34,7 +39,11 @@ public class TestController {
     @GetMapping("/get-scores")
     public ResponseEntity<Object> getScores() throws EntityNotFoundException {
 
-        List<GameResponse> games = gameService.getSoresFromApi("baseball_mlb");
+        List<GameResponse> games = gameService.getScoresFromApi("baseball_mlb");
+
+        List<GameResponse> additionalGames = gameService.getScoresFromApi("americanfootball_cfl");
+
+        games.addAll(additionalGames);
 
         return ResponseEntity.ok(games);
     }

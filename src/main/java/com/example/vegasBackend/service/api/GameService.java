@@ -1,8 +1,6 @@
 package com.example.vegasBackend.service.api;
 
 import com.example.vegasBackend.dto.response.GameResponse;
-import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
-import com.example.vegasBackend.dto.response.gameScoreApi.GameScoreResponseApi;
 import com.example.vegasBackend.exception.EntityNotFoundException;
 
 import java.util.List;
@@ -32,7 +30,7 @@ public interface GameService{
      * @param sportKey
      * @return List<GameResponse>
      */
-    List<GameResponse> getSoresFromApi(String sportKey) throws EntityNotFoundException;
+    List<GameResponse> getScoresFromApi(String sportKey) throws EntityNotFoundException;
 
     /**
      * Deletes games that are finished and have no tickets

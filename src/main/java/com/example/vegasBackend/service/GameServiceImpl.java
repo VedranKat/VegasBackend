@@ -6,6 +6,7 @@ import com.example.vegasBackend.dto.response.gameResponseApi.GameResponseApi;
 import com.example.vegasBackend.dto.response.gameResponseApi.OutcomeResponse;
 import com.example.vegasBackend.dto.response.gameScoreApi.GameScoreResponseApi;
 import com.example.vegasBackend.exception.EntityNotFoundException;
+import com.example.vegasBackend.exception.OddsApiError;
 import com.example.vegasBackend.model.Game;
 import com.example.vegasBackend.model.Sport;
 import com.example.vegasBackend.model.TicketGame;
@@ -73,7 +74,7 @@ public class GameServiceImpl implements GameService {
     //Create some sort of check to see if a game hasn't been updated
     //even though it's finished, in case the API fails to update the game
     @Override
-    public List<GameResponse> getSoresFromApi(String sportKey) throws EntityNotFoundException {
+    public List<GameResponse> getScoresFromApi(String sportKey) throws EntityNotFoundException {
 
         String apiUrl = "https://api.the-odds-api.com/v4/sports/"
                 +sportKey
@@ -110,7 +111,7 @@ public class GameServiceImpl implements GameService {
         return gameResponses;
     }
 
-    private <T> List<T> getGamesFromApi(String apiUrl, Class<T> responseType) throws EntityNotFoundException {
+    private <T> List<T> getGamesFromApi(String apiUrl, Class<T> responseType) {
 
         try {
             // Create an instance of ObjectMapper
@@ -139,7 +140,7 @@ public class GameServiceImpl implements GameService {
             return objectMapper.readValue(jsonContent.toString(), javaType);
         } catch (IOException e) {
             e.printStackTrace();
-            return null; // TODO: Improve error handling
+            throw new OddsApiError("Error while getting games from API");
         }
     }
 
